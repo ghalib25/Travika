@@ -130,25 +130,57 @@ namespace UserService.GraphQL
             return await Task.FromResult(user);
         }
 
-        //========================================ADD CUSTOMER PROFILE BY USER==========================================//
+        //========================================ADD CUSTOMER PROFILE BY USER==========================================// 
+
         [Authorize]
-        public async Task<CustomerProfile> AddProfileAsync(
-            CustomerProfileInput input,
-            [Service] TravikaContext context)
+        public async Task<CustomerProfile> AddCustomerProfileAsync(
+           CustomerProfileInput input,
+           [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
         {
+            var userName = claimsPrincipal.Identity.Name;
+            var user = context.Users.Where(o => o.Username == userName).FirstOrDefault();
+            var profileCustomer = context.CustomerProfiles.Where(o => o.UserId == user.Id).FirstOrDefault();
+
+            if (profileCustomer != null) return new CustomerProfile { Name = "Customer Profil sudah tersedia" };
+            if (user == null) return new CustomerProfile();
+
             var customerProfile = new CustomerProfile
             {
-                UserId = input.UserId,
+                UserId = user.Id,
                 Name = input.Name,
                 Address = input.Address,
                 City = input.City,
-                Phone = input.Phone
-
+                Phone = input.Phone,
             };
             var ret = context.CustomerProfiles.Add(customerProfile);
             await context.SaveChangesAsync();
-            return ret.Entity;
 
+            return ret.Entity;
+        }
+
+        //========================================ADD MERCHANT PROFILE BY USER==========================================//        
+
+        [Authorize]
+        public async Task<MerchantProfile> AddMerchantProfileAsync(
+           MerchantProfileInput input,
+           [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
+        {
+            var userName = claimsPrincipal.Identity.Name;
+            var user = context.Users.Where(o => o.Username == userName).FirstOrDefault();
+            var profileMerchant = context.MerchantProfiles.Where(o => o.UserId == user.Id).FirstOrDefault();
+
+            if (profileMerchant != null) return new MerchantProfile { CompanyName = "Merchant profile sudah tersedia" };
+            if (user == null) return new MerchantProfile();
+
+            var merchantProfile = new MerchantProfile
+            {
+                UserId = user.Id,
+                CompanyName = input.CompanyName
+            };
+            var ret = context.MerchantProfiles.Add(merchantProfile);
+            await context.SaveChangesAsync();
+
+            return ret.Entity;
         }
 
         //========================================UPDATE USER ROLE BY MANAGER=====================================//
