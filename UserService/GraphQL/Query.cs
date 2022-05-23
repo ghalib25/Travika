@@ -27,9 +27,9 @@ namespace UserService.GraphQL
                 RoleId = p.RoleId
             });
 
-        //-------------------------------------VIEW PROFILE BY TOKEN--------------------------------------------//
+        //-------------------------------------VIEW CUSTOMER PROFILE BY TOKEN--------------------------------------------//
         [Authorize]
-        public IQueryable<CustomerProfile> GetProfilesbyToken(
+        public IQueryable<CustomerProfile> GetCustomerProfilesbyToken(
             [Service] TravikaContext context,
             ClaimsPrincipal claimsPrincipal)
         {
@@ -41,6 +41,22 @@ namespace UserService.GraphQL
                 return profiles.AsQueryable();
             }
             return new List<CustomerProfile>().AsQueryable();
+        }
+
+        //-------------------------------------VIEW MERCHANT PROFILE BY TOKEN--------------------------------------------//
+        [Authorize]
+        public IQueryable<MerchantProfile> GetMerchantProfilesbyToken(
+            [Service] TravikaContext context,
+            ClaimsPrincipal claimsPrincipal)
+        {
+            var username = claimsPrincipal.Identity.Name;
+            var user = context.Users.Where(o => o.Username == username).FirstOrDefault();
+            if (user != null)
+            {
+                var profiles = context.MerchantProfiles.Where(o => o.UserId == user.Id);
+                return profiles.AsQueryable();
+            }
+            return new List<MerchantProfile>().AsQueryable();
         }
     }
 }
