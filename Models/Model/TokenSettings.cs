@@ -1,4 +1,4 @@
-﻿namespace Model.Models
+﻿namespace Model.Model
 {
     public class TokenSettings
     {
