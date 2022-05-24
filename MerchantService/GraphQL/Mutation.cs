@@ -5,7 +5,8 @@ namespace MerchantService.GraphQL
 {
     public class Mutation
     {
-        //========================================Ticketing========================================
+        //========================================TICKETING========================================
+
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Ticketing> AddTicketingAsync(
            TicketInput input,
@@ -68,6 +69,8 @@ namespace MerchantService.GraphQL
             }
             return await Task.FromResult(ticketing);
         }
+
+        //========================================HOTEL========================================
 
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Hotel> AddHotelAsync(
