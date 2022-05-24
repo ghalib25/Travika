@@ -49,7 +49,7 @@ var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapGraphQL();
-app.MapGet("/", () => "Hello World!");
+app.MapGraphQL("/");
+app.MapGet("/hello", () => "Hello World!");
 
 app.Run();
