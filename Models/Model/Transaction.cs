@@ -11,8 +11,8 @@ namespace Model.Model
         public int? DetailsTicketingId { get; set; }
         public int? DetailsHotelId { get; set; }
         public int PaymentId { get; set; }
-        public int Total { get; set; }
-        public string Status { get; set; } = null!;
+        public int TotalBill { get; set; }
+        public string PaymentStatus { get; set; } = null!;
 
         public virtual DetailsHotel? DetailsHotel { get; set; }
         public virtual DetailsTicketing? DetailsTicketing { get; set; }

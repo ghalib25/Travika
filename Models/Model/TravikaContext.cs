@@ -30,11 +30,11 @@ namespace Model.Model
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-//            if (!optionsBuilder.IsConfigured)
-//            {
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-//                optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=Travika;uid=sa;pwd=123;");
-//            }
+            if (!optionsBuilder.IsConfigured)
+            {
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=Travika;uid=sa;pwd=123;");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -72,7 +72,6 @@ namespace Model.Model
                 entity.HasOne(d => d.Hotel)
                     .WithMany(p => p.DetailsHotels)
                     .HasForeignKey(d => d.HotelId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_DetailsHotel_Hotel");
             });
 
@@ -83,7 +82,6 @@ namespace Model.Model
                 entity.HasOne(d => d.Ticketing)
                     .WithMany(p => p.DetailsTicketings)
                     .HasForeignKey(d => d.TicketingId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_DetailsTicketing_Ticketing");
             });
 
@@ -110,7 +108,6 @@ namespace Model.Model
                 entity.HasOne(d => d.Merchant)
                     .WithMany(p => p.Hotels)
                     .HasForeignKey(d => d.MerchantId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Hotel_MerchantProfile");
             });
 
@@ -125,7 +122,6 @@ namespace Model.Model
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.MerchantProfiles)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_MerchantProfile_User");
             });
 
@@ -171,7 +167,6 @@ namespace Model.Model
                 entity.HasOne(d => d.Merchant)
                     .WithMany(p => p.Ticketings)
                     .HasForeignKey(d => d.MerchantId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Ticketing_MerchantProfile");
             });
 
@@ -179,7 +174,7 @@ namespace Model.Model
             {
                 entity.ToTable("Transaction");
 
-                entity.Property(e => e.Status)
+                entity.Property(e => e.PaymentStatus)
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
@@ -200,13 +195,11 @@ namespace Model.Model
                 entity.HasOne(d => d.Payment)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.PaymentId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Transaction_Payment");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Transaction_User");
             });
 
@@ -232,13 +225,11 @@ namespace Model.Model
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.UserRoles)
                     .HasForeignKey(d => d.RoleId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserRole_Role");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.UserRoles)
                     .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_UserRole_User");
             });
 

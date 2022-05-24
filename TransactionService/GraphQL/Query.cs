@@ -15,8 +15,8 @@ namespace TransactionService.GraphQL
                 DetailsTicketingId = t.DetailsTicketingId,
                 DetailsHotelId = t.DetailsHotelId,
                 PaymentId = t.PaymentId,
-                Total = t.Total,
-                Status = t.Status
+                TotalBill = t.TotalBill,
+                PaymentStatus = t.PaymentStatus
             });
     }
 }
