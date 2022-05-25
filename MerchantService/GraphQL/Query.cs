@@ -8,10 +8,10 @@ namespace MerchantService.GraphQL
     {
         [Authorize(Roles = new[] { "CUSTOMER" })]
         public IQueryable<Ticketing> GetTicketing([Service] TravikaContext context) =>
-            context.Ticketings.Include(t => t.DetailsTicketings);
+            context.Ticketings;
 
         [Authorize(Roles = new[] { "CUSTOMER" })]
         public IQueryable<Hotel> GetHotel([Service] TravikaContext context) =>
-            context.Hotels.Include(t => t.DetailsHotels);
+            context.Hotels;
     }
 }
