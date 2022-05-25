@@ -4,7 +4,7 @@
 
    (
        int? Id,
-       int UserId,
+       int? UserId,
        string CompanyName
    );
 }

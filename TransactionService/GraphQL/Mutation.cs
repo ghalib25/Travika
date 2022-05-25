@@ -1,7 +1,11 @@
 ﻿using HotChocolate.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Model.Model;
+using Newtonsoft.Json;
 using System.Security.Claims;
 using TransactionService.GraphQL;
+using TransactionService.Kafka;
 
 namespace TransactionService.GraphQL
 {
@@ -11,70 +15,141 @@ namespace TransactionService.GraphQL
         [Authorize(Roles = new[] { "CUSTOMER" })]
         public async Task<TransactionStatus> AddTransactionAsync(
             TransactionData input,
-            int hotelprice, int ticketingprice,
-            int stay, int seat,
             ClaimsPrincipal claimsPrincipal,
-            [Service] TravikaContext context)
+            [Service] TravikaContext context,
+            [Service] IOptions<KafkaSettings> settings)
         {
+            using var begintransaction = context.Database.BeginTransaction();
             var userName = claimsPrincipal.Identity.Name;
-            var customer = context.Users.Where(u => u.Username == userName).FirstOrDefault();
-            var customerprofile = context.CustomerProfiles.Where(c => c.UserId == customer.Id).FirstOrDefault();
-            var checkstatus = context.Transactions.Where(c => c.UserId == customer.Id).LastOrDefault();
 
-            if (checkstatus.PaymentStatus != "Unpaid")
+            try
             {
-                var transaction = new Transaction
-                {
-                    UserId = customer.Id,
-                    VirtualAccount = "0778" + customerprofile.Phone,
-                    PaymentId = input.PaymentId,
-                    TotalBill = 0,
-                    PaymentStatus = "Unpaid"
-                };
+                var customer = context.Users.Include(u => u.Transactions).Where(u => u.Username == userName).FirstOrDefault();
+                var customerprofile = context.CustomerProfiles.Where(c => c.UserId == customer.Id).FirstOrDefault();
 
-                int TotalHotelPrice = 0;
-                var itemhotel = input.DetailHotels;
+                if (customer != null)
                 {
+                    var ordercustomer = customer.Transactions.Where(t => t.UserId == customer.Id).OrderBy(t => t.Id).LastOrDefault();
+                    if (ordercustomer.PaymentStatus == "Unpaid")
+                    {
+                        return await Task.FromResult(new TransactionStatus
+                        (
+                            false, "Tidak Bisa Menambah Transaksi Sebelum Melakukan Pembayaran"
+                        ));
+                    }
+
+                    var transaction = new Transaction
+                    {
+                        UserId = customer.Id,
+                        VirtualAccount = "0778" + customerprofile.Phone,
+                        PaymentId = input.PaymentId,
+                        TotalBill = 0,
+                        PaymentStatus = "Unpaid"
+                    };
+
+                    int TotalHotelPrice = 0;
+                    var itemhotel = input.DetailHotels;
                     var detailhotel = new DetailsHotel
                     {
                         TransactionId = transaction.Id,
                         HotelId = itemhotel.HotelId,
-                        Quantity = itemhotel.Quantity
+                        Quantity = itemhotel.Quantity,
+                        Created = DateTime.Now
                     };
                     var hotel = context.Hotels.Where(h => h.Id == detailhotel.HotelId).FirstOrDefault();
+                    if(hotel.Room < detailhotel.Quantity)
+                    {
+                        return await Task.FromResult(new TransactionStatus
+                        (
+                            false, "Jumlah Kamar Tidak Mencukupi"
+                        ));
+                    }
                     transaction.DetailsHotels.Add(detailhotel);
+                    hotel.Room -= detailhotel.Quantity;
                     TotalHotelPrice += hotel.Price * detailhotel.Quantity;
-                };
 
-                int TotalTicketPrice = 0;
-                var itemticket = input.DetailTicketings;
-                {
+                    int TotalTicketPrice = 0;
+                    var itemticket = input.DetailTicketings;
                     var detailTicket = new DetailsTicketing
                     {
                         TranscationId = transaction.Id,
                         TicketingId = itemticket.TicketingId,
-                        Quantity = itemticket.Quantity
+                        Quantity = itemticket.Quantity,
+                        Created = DateTime.Now
                     };
                     var ticket = context.Ticketings.Where(t => t.Id == detailTicket.TicketingId).FirstOrDefault();
+                    if (ticket.Seat < detailTicket.Quantity)
+                    {
+                        return await Task.FromResult(new TransactionStatus
+                        (
+                            false, "Jumlah Kursi Tidak Mencukupi"
+                        ));
+                    }
+                    ticket.Seat -= detailTicket.Quantity;
                     transaction.DetailsTicketings.Add(detailTicket);
                     TotalTicketPrice += ticket.Price * detailTicket.Quantity;
-                };
 
-                transaction.TotalBill = TotalHotelPrice + TotalTicketPrice;
-                context.Transactions.Add(transaction);
-                await context.SaveChangesAsync();
+                    transaction.TotalBill = TotalHotelPrice + TotalTicketPrice;
+                    context.Transactions.Add(transaction);
+                    await begintransaction.CommitAsync();
 
-                return await Task.FromResult(new TransactionStatus
-                    (
-                        true, $"Order Success! Order Fee:{transaction.TotalBill.ToString()}. Waiting for Payment..."
-                    ));
+                    //SendDataOrder dengan Kafka
+                    SendDataOrder virtualAccount = new SendDataOrder
+                    {
+                        TransactionId = transaction.Id,
+                        Virtualaccount = transaction.VirtualAccount , //0778 + phone
+                        Bills = Convert.ToString(transaction.TotalBill), //total cost
+                        PaymentStatus = transaction.PaymentStatus
+                    };
+
+                    var key = DateTime.Now.ToString();
+                    var val = JsonConvert.SerializeObject(virtualAccount);
+                    if (transaction.PaymentId == 2)
+                    {
+                        bool result = KafkaHelper.SendMessage(settings.Value, "OPO", key, val).Result;
+                        if (result)
+                        {
+                            Console.WriteLine("Sukses Kirim ke Kafka");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Gagal Kirim ke Kafka");
+                        }
+                    }
+                    else if (transaction.PaymentId == 1)
+                    {
+                        bool result = KafkaHelper.SendMessage(settings.Value, "BANK", key, val).Result;
+                        if (result)
+                        {
+                            Console.WriteLine("Sukses Kirim ke Kafka");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Gagal Kirim ke Kafka");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Payment Not Available");
+                    }
+                    return await Task.FromResult(new TransactionStatus
+                        (
+                        true, "Berhasil Membuat Order"
+                        ));
+                }
+                else
+                {
+                    throw new Exception("user was not found");
+                }
+
             }
-            else
+            catch (Exception ex)
             {
+                begintransaction.Rollback();
                 return await Task.FromResult(new TransactionStatus
-                    (
-                        false, "Order Failed! Please Finish Your Last Order!"
-                    ));
+                   (
+                       false, ex.Message
+                   ));
             }
         }
 

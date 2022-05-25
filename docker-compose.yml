@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  merchantservice:
+    image: ${DOCKER_REGISTRY-}merchantservice
+    build:
+      context: .
+      dockerfile: MerchantService/Dockerfile
+
+  model:
+    image: ${DOCKER_REGISTRY-}model
+    build:
+      context: .
+      dockerfile: Models/Dockerfile
+
+
+  transactionservice:
+    image: ${DOCKER_REGISTRY-}transactionservice
+    build:
+      context: .
+      dockerfile: TransactionService/Dockerfile
+
+
+  userservice:
+    image: ${DOCKER_REGISTRY-}userservice
+    build:
+      context: .
+      dockerfile: UserService/Dockerfile
+

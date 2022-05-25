@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32414.318
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserService", "UserService\UserService.csproj", "{C2D5AC29-669D-4F2E-B612-9087F2D5033C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserService", "UserService\UserService.csproj", "{C2D5AC29-669D-4F2E-B612-9087F2D5033C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MerchantService", "MerchantService\MerchantService.csproj", "{96460E91-FE13-4C90-82B9-2DD8A615760F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MerchantService", "MerchantService\MerchantService.csproj", "{96460E91-FE13-4C90-82B9-2DD8A615760F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransactionService", "TransactionService\TransactionService.csproj", "{ADF8BDC9-DD38-4184-A8F6-CC8D8892B9B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TransactionService", "TransactionService\TransactionService.csproj", "{ADF8BDC9-DD38-4184-A8F6-CC8D8892B9B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Models\Model.csproj", "{438E31AF-7B79-4A94-8508-74E92945109D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model", "Models\Model.csproj", "{438E31AF-7B79-4A94-8508-74E92945109D}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{21DA5BD1-AD15-4545-A986-E34A3A5EB997}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{438E31AF-7B79-4A94-8508-74E92945109D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{438E31AF-7B79-4A94-8508-74E92945109D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{438E31AF-7B79-4A94-8508-74E92945109D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21DA5BD1-AD15-4545-A986-E34A3A5EB997}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21DA5BD1-AD15-4545-A986-E34A3A5EB997}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21DA5BD1-AD15-4545-A986-E34A3A5EB997}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21DA5BD1-AD15-4545-A986-E34A3A5EB997}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

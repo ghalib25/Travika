@@ -18,6 +18,8 @@ namespace Model.Model
         public int TotalBill { get; set; }
         public string PaymentStatus { get; set; } = null!;
 
+        public virtual Payment Payment { get; set; } = null!;
+        public virtual User User { get; set; } = null!;
         public virtual ICollection<DetailsHotel> DetailsHotels { get; set; }
         public virtual ICollection<DetailsTicketing> DetailsTicketings { get; set; }
     }

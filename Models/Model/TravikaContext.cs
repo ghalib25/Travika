@@ -58,6 +58,11 @@ namespace Model.Model
                 entity.Property(e => e.Phone)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.CustomerProfiles)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK_CustomerProfile_User");
             });
 
             modelBuilder.Entity<DetailsHotel>(entity =>
@@ -110,9 +115,10 @@ namespace Model.Model
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Status)
-                    .HasMaxLength(50)
-                    .IsUnicode(false);
+                entity.HasOne(d => d.Merchant)
+                    .WithMany(p => p.Hotels)
+                    .HasForeignKey(d => d.MerchantId)
+                    .HasConstraintName("FK_Hotel_MerchantProfile");
             });
 
             modelBuilder.Entity<MerchantProfile>(entity =>
@@ -122,6 +128,12 @@ namespace Model.Model
                 entity.Property(e => e.CompanyName)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.MerchantProfiles)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_MerchantProfile_User");
             });
 
             modelBuilder.Entity<Payment>(entity =>
@@ -162,6 +174,11 @@ namespace Model.Model
                 entity.Property(e => e.Origin)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.Merchant)
+                    .WithMany(p => p.Ticketings)
+                    .HasForeignKey(d => d.MerchantId)
+                    .HasConstraintName("FK_Ticketing_MerchantProfile");
             });
 
             modelBuilder.Entity<Transaction>(entity =>
@@ -175,6 +192,16 @@ namespace Model.Model
                 entity.Property(e => e.VirtualAccount)
                     .HasMaxLength(50)
                     .IsUnicode(false);
+
+                entity.HasOne(d => d.Payment)
+                    .WithMany(p => p.Transactions)
+                    .HasForeignKey(d => d.PaymentId)
+                    .HasConstraintName("FK_Transaction_Payment");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Transactions)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK_Transaction_User");
             });
 
             modelBuilder.Entity<User>(entity =>

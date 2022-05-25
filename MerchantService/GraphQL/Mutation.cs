@@ -1,5 +1,6 @@
 ﻿using HotChocolate.AspNetCore.Authorization;
 using Model.Model;
+using System.Security.Claims;
 
 namespace MerchantService.GraphQL
 {
@@ -9,14 +10,22 @@ namespace MerchantService.GraphQL
 
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Ticketing> AddTicketingAsync(
+<<<<<<< HEAD
+           TicketInput input,
+           [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
+=======
            TicketingInput input,
             [Service] TravikaContext context)
+>>>>>>> b99cd106b9d6b292c403721f495a13c3afa0a78b
         {
+            var userName = claimsPrincipal.Identity.Name;
+            var user = context.Users.Where(o => o.Username == userName).FirstOrDefault();
+            var merchant = context.MerchantProfiles.Where(m => m.UserId == user.Id).FirstOrDefault();
 
             // EF
             var ticketing = new Ticketing
             {
-                MerchantId = input.MerchantId,
+                MerchantId = merchant.Id,
                 Category = input.Category,
                 Origin = input.Origin,
                 Destination = input.Destination,
@@ -35,13 +44,21 @@ namespace MerchantService.GraphQL
         //Update 
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Ticketing> UpdateTicketingAsync(
+<<<<<<< HEAD
+            TicketInput input, int id,
+            [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
+=======
             TicketingInput input,
             [Service] TravikaContext context)
+>>>>>>> b99cd106b9d6b292c403721f495a13c3afa0a78b
         {
-            var ticketing = context.Ticketings.Where(o => o.Id == input.Id).FirstOrDefault();
+            var userName = claimsPrincipal.Identity.Name;
+            var user = context.Users.Where(o => o.Username == userName).FirstOrDefault();
+            var merchant = context.MerchantProfiles.Where(m => m.UserId == user.Id).FirstOrDefault();
+            var ticketing = context.Ticketings.Where(t => t.Id == id).FirstOrDefault();
             if (ticketing != null)
             {
-                ticketing.MerchantId = input.MerchantId;
+                ticketing.MerchantId = merchant.Id;
                 ticketing.Category = input.Category;
                 ticketing.Origin = input.Origin;
                 ticketing.Destination = input.Destination;
@@ -75,18 +92,19 @@ namespace MerchantService.GraphQL
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Hotel> AddHotelAsync(
             HotelInput input,
-            [Service] TravikaContext context)
+            [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
         {
+            var userName = claimsPrincipal.Identity.Name;
+            var user = context.Users.Where(o => o.Username == userName).FirstOrDefault();
+            var merchant = context.MerchantProfiles.Where(m => m.UserId == user.Id).FirstOrDefault();
             //EF
             var hotel = new Hotel
             {
-                MerchantId = input.MerchantId,
+                MerchantId = merchant.Id,
                 HotelName = input.HotelName,
                 Address = input.Address,
                 City = input.City,
-                Price = input.Price,
-                Status = input.Status,
-
+                Price = input.Price
             };
 
             var ret = context.Hotels.Add(hotel);
@@ -104,8 +122,9 @@ namespace MerchantService.GraphQL
             if (hotel != null)
             {
                 hotel.HotelName = input.HotelName;
+                hotel.Address = input.Address;
+                hotel.City = input.City;
                 hotel.Price = input.Price;
-                hotel.Status = input.Status;
 
                 context.Hotels.Update(hotel);
                 await context.SaveChangesAsync();

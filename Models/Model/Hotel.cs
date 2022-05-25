@@ -16,8 +16,9 @@ namespace Model.Model
         public string Address { get; set; } = null!;
         public string City { get; set; } = null!;
         public int Price { get; set; }
-        public string Status { get; set; } = null!;
+        public int Room { get; set; }
 
+        public virtual MerchantProfile Merchant { get; set; } = null!;
         public virtual ICollection<DetailsHotel> DetailsHotels { get; set; }
     }
 }
