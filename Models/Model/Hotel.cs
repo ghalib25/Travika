@@ -18,7 +18,6 @@ namespace Model.Model
         public int Price { get; set; }
         public string Status { get; set; } = null!;
 
-        public virtual MerchantProfile Merchant { get; set; } = null!;
         public virtual ICollection<DetailsHotel> DetailsHotels { get; set; }
     }
 }

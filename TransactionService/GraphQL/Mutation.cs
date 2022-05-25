@@ -19,12 +19,6 @@ namespace TransactionService.GraphQL
             var userName = claimsPrincipal.Identity.Name;
             var customer = context.Users.Where(u => u.Username == userName).FirstOrDefault();
             var customerprofile = context.CustomerProfiles.Where(c => c.UserId == customer.Id).FirstOrDefault();
-            var pricehotel = context.Hotels.Where(h => h.Price == hotelprice).FirstOrDefault();
-            var priceticket = context.Ticketings.Where(t => t.Price == ticketingprice).FirstOrDefault();
-            var totalstay = context.DetailsHotels.Where(h => h.Quantity == stay).LastOrDefault();
-            var totalseat = context.DetailsTicketings.Where(t => t.Quantity == seat).LastOrDefault();
-            var totalpricehotel = Convert.ToInt16(totalstay) * Convert.ToInt16(pricehotel);
-            var totalpriceseat = Convert.ToInt16(totalseat) * Convert.ToInt16(priceticket);
             var checkstatus = context.Transactions.Where(c => c.UserId == customer.Id).LastOrDefault();
 
             if (checkstatus.PaymentStatus != "Unpaid")
@@ -33,12 +27,40 @@ namespace TransactionService.GraphQL
                 {
                     UserId = customer.Id,
                     VirtualAccount = "0778" + customerprofile.Phone,
-                    DetailsTicketingId = input.DetailTicketingId,
-                    DetailsHotelId = input.DetailHotelId,
                     PaymentId = input.PaymentId,
-                    TotalBill = totalpricehotel + totalpriceseat,
+                    TotalBill = 0,
                     PaymentStatus = "Unpaid"
                 };
+
+                int TotalHotelPrice = 0;
+                var itemhotel = input.DetailHotels;
+                {
+                    var detailhotel = new DetailsHotel
+                    {
+                        TransactionId = transaction.Id,
+                        HotelId = itemhotel.HotelId,
+                        Quantity = itemhotel.Quantity
+                    };
+                    var hotel = context.Hotels.Where(h => h.Id == detailhotel.HotelId).FirstOrDefault();
+                    transaction.DetailsHotels.Add(detailhotel);
+                    TotalHotelPrice += hotel.Price * detailhotel.Quantity;
+                };
+
+                int TotalTicketPrice = 0;
+                var itemticket = input.DetailTicketings;
+                {
+                    var detailTicket = new DetailsTicketing
+                    {
+                        TranscationId = transaction.Id,
+                        TicketingId = itemticket.TicketingId,
+                        Quantity = itemticket.Quantity
+                    };
+                    var ticket = context.Ticketings.Where(t => t.Id == detailTicket.TicketingId).FirstOrDefault();
+                    transaction.DetailsTicketings.Add(detailTicket);
+                    TotalTicketPrice += ticket.Price * detailTicket.Quantity;
+                };
+
+                transaction.TotalBill = TotalHotelPrice + TotalTicketPrice;
                 context.Transactions.Add(transaction);
                 await context.SaveChangesAsync();
 
@@ -54,74 +76,6 @@ namespace TransactionService.GraphQL
                         false, "Order Failed! Please Finish Your Last Order!"
                     ));
             }
-        }
-
-        //Add detail Hotel
-        [Authorize(Roles = new[] { "CUSTOMER" })]
-        public async Task<TransactionStatus> AddDetailHotelAsync(
-            DetailsHotel input,
-            ClaimsPrincipal claimsPrincipal,
-            [Service] TravikaContext context)
-        {
-            var userName = claimsPrincipal.Identity.Name;
-            var customer = context.Users.Where(u => u.Username == userName).FirstOrDefault();
-            var checkstatus = context.Transactions.Where(c => c.UserId == customer.Id).LastOrDefault();
-
-            if (checkstatus.PaymentStatus != "Unpaid")
-            {
-                var detailsHotel = new DetailsHotel
-                {
-                    HotelId = input.HotelId,
-                    Quantity = input.Quantity
-                };
-                var ret = context.DetailsHotels.Add(detailsHotel);
-                await context.SaveChangesAsync();
-
-                return await Task.FromResult(new TransactionStatus
-                (
-                    true, "Order Successfull"
-                ));
-
-            }
-
-            return await Task.FromResult(new TransactionStatus
-               (
-                   false, "Finish Your Last Order!!!"
-               ));
-        }
-
-        //Add detail Hotel
-        [Authorize(Roles = new[] { "CUSTOMER" })]
-        public async Task<TransactionStatus> AddDetailTicketingAsync(
-            DetailsTicketing input,
-            ClaimsPrincipal claimsPrincipal,
-            [Service] TravikaContext context)
-        {
-            var userName = claimsPrincipal.Identity.Name;
-            var customer = context.Users.Where(u => u.Username == userName).FirstOrDefault();
-            var checkstatus = context.Transactions.Where(c => c.UserId == customer.Id).LastOrDefault();
-
-            if (checkstatus.PaymentStatus != "Unpaid")
-            {
-                var detailsTicketing = new DetailsTicketing
-                {
-                    TicketingId = input.TicketingId,
-                    Quantity = input.Quantity
-                };
-                var ret = context.DetailsTicketings.Add(detailsTicketing);
-                await context.SaveChangesAsync();
-
-                return await Task.FromResult(new TransactionStatus
-                (
-                    true, "Order Successfull"
-                ));
-
-            }
-
-            return await Task.FromResult(new TransactionStatus
-               (
-                   false, "Finish Your Last Order!!!"
-               ));
         }
 
         //Update Transaction
@@ -157,17 +111,29 @@ namespace TransactionService.GraphQL
 
         //Delete Transaction
         [Authorize(Roles = new[] { "CUSTOMER" })]
-        public async Task<Transaction> DeleteTransactionByIdAsync(
+        public async Task<TransactionStatus> DeleteTransactionByIdAsync(
             int id,
             [Service] TravikaContext context)
         {
             var transaction = context.Transactions.Where(o => o.Id == id).FirstOrDefault();
-            if (transaction != null)
+            if (transaction == null)
+            {
+                return await Task.FromResult(new TransactionStatus(false, "Transaction not Found!"));
+            }
+            if (transaction.PaymentStatus == "UNPAID")
             {
                 context.Transactions.Remove(transaction);
                 await context.SaveChangesAsync();
+                return await Task.FromResult(new TransactionStatus
+            (
+                true, "Transaction Deleted"
+            ));
             }
-            return await Task.FromResult(transaction);
+
+            return await Task.FromResult(new TransactionStatus
+            (
+                true, "Transaction Cancelled"
+            ));
         }
     }
 }
