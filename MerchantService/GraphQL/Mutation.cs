@@ -1,5 +1,4 @@
 ﻿using HotChocolate.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Model.Model;
 
 namespace MerchantService.GraphQL
@@ -10,7 +9,7 @@ namespace MerchantService.GraphQL
 
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Ticketing> AddTicketingAsync(
-           TicketingData input,
+           TicketingInput input,
             [Service] TravikaContext context)
         {
 
@@ -26,15 +25,6 @@ namespace MerchantService.GraphQL
                 Price = input.Price,
 
             };
-            foreach (var item in input.Details)
-            {
-                var detail = new DetailsTicketing
-                {
-                    TicketingId = ticketing.Id,
-                    Quantity = item.Quantity
-                };
-                ticketing.DetailsTicketings.Add(detail);
-            }
 
             var ret = context.Ticketings.Add(ticketing);
             await context.SaveChangesAsync();
@@ -45,10 +35,10 @@ namespace MerchantService.GraphQL
         //Update 
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Ticketing> UpdateTicketingAsync(
-            TicketingData input,
+            TicketingInput input,
             [Service] TravikaContext context)
         {
-            var ticketing = context.Ticketings.Where(o => o.Id == input.Id).Include(t => t.DetailsTicketings).FirstOrDefault();
+            var ticketing = context.Ticketings.Where(o => o.Id == input.Id).FirstOrDefault();
             if (ticketing != null)
             {
                 ticketing.MerchantId = input.MerchantId;
@@ -84,7 +74,7 @@ namespace MerchantService.GraphQL
 
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Hotel> AddHotelAsync(
-            HotelData input,
+            HotelInput input,
             [Service] TravikaContext context)
         {
             //EF
@@ -98,15 +88,6 @@ namespace MerchantService.GraphQL
                 Status = input.Status,
 
             };
-            foreach (var item in input.Details)
-            {
-                var detail = new DetailsHotel
-                {
-                    HotelId = hotel.Id,
-                    Quantity = item.Quantity
-                };
-                hotel.DetailsHotels.Add(detail);
-            }
 
             var ret = context.Hotels.Add(hotel);
             await context.SaveChangesAsync();
@@ -119,7 +100,7 @@ namespace MerchantService.GraphQL
             HotelInput input,
             [Service] TravikaContext context)
         {
-            var hotel = context.Hotels.Where(o => o.Id == input.Id).Include(h => h.DetailsHotels).FirstOrDefault();
+            var hotel = context.Hotels.Where(o => o.Id == input.Id).FirstOrDefault();
             if (hotel != null)
             {
                 hotel.HotelName = input.HotelName;
