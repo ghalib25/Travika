@@ -175,13 +175,9 @@ namespace TransactionService.GraphQL
 
                 return await Task.FromResult(new TransactionStatus
                 (
-                    true, "Order Updated"
+                    true, "Transaction Updated"
                 ));
             }
-            return await Task.FromResult(new TransactionStatus
-               (
-                   false, "Update Failed! Courier not Found!"
-               ));
         }
 
         //Delete Transaction
@@ -210,5 +206,7 @@ namespace TransactionService.GraphQL
                 true, "Transaction Cancelled"
             ));
         }
+
+        
     }
 }

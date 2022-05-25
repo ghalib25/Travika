@@ -10,13 +10,8 @@ namespace MerchantService.GraphQL
 
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Ticketing> AddTicketingAsync(
-<<<<<<< HEAD
-           TicketInput input,
-           [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
-=======
            TicketingInput input,
-            [Service] TravikaContext context)
->>>>>>> b99cd106b9d6b292c403721f495a13c3afa0a78b
+           [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
         {
             var userName = claimsPrincipal.Identity.Name;
             var user = context.Users.Where(o => o.Username == userName).FirstOrDefault();
@@ -44,13 +39,9 @@ namespace MerchantService.GraphQL
         //Update 
         [Authorize(Roles = new[] { "MERCHANT" })]
         public async Task<Ticketing> UpdateTicketingAsync(
-<<<<<<< HEAD
-            TicketInput input, int id,
+            TicketingInput input, int id,
             [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
-=======
-            TicketingInput input,
-            [Service] TravikaContext context)
->>>>>>> b99cd106b9d6b292c403721f495a13c3afa0a78b
+
         {
             var userName = claimsPrincipal.Identity.Name;
             var user = context.Users.Where(o => o.Username == userName).FirstOrDefault();
