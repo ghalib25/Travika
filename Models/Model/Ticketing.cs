@@ -19,7 +19,6 @@ namespace Model.Model
         public DateTime Arrival { get; set; }
         public int Price { get; set; }
 
-        public virtual MerchantProfile Merchant { get; set; } = null!;
         public virtual ICollection<DetailsTicketing> DetailsTicketings { get; set; }
     }
 }

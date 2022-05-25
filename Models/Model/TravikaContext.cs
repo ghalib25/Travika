@@ -32,8 +32,8 @@ namespace Model.Model
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=Travika;uid=sa;pwd=123;");
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+//                optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=Travika;uid=sa;pwd=123;");
             }
         }
 
@@ -58,31 +58,40 @@ namespace Model.Model
                 entity.Property(e => e.Phone)
                     .HasMaxLength(50)
                     .IsUnicode(false);
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.CustomerProfiles)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_CustomerProfile_User");
             });
 
             modelBuilder.Entity<DetailsHotel>(entity =>
             {
                 entity.ToTable("DetailsHotel");
 
+                entity.Property(e => e.Created).HasColumnType("datetime");
+
                 entity.HasOne(d => d.Hotel)
                     .WithMany(p => p.DetailsHotels)
                     .HasForeignKey(d => d.HotelId)
                     .HasConstraintName("FK_DetailsHotel_Hotel");
+
+                entity.HasOne(d => d.Transaction)
+                    .WithMany(p => p.DetailsHotels)
+                    .HasForeignKey(d => d.TransactionId)
+                    .HasConstraintName("FK_DetailsHotel_Transaction");
             });
 
             modelBuilder.Entity<DetailsTicketing>(entity =>
             {
                 entity.ToTable("DetailsTicketing");
 
+                entity.Property(e => e.Created).HasColumnType("datetime");
+
                 entity.HasOne(d => d.Ticketing)
                     .WithMany(p => p.DetailsTicketings)
                     .HasForeignKey(d => d.TicketingId)
                     .HasConstraintName("FK_DetailsTicketing_Ticketing");
+
+                entity.HasOne(d => d.Transcation)
+                    .WithMany(p => p.DetailsTicketings)
+                    .HasForeignKey(d => d.TranscationId)
+                    .HasConstraintName("FK_DetailsTicketing_Transaction");
             });
 
             modelBuilder.Entity<Hotel>(entity =>
@@ -104,11 +113,6 @@ namespace Model.Model
                 entity.Property(e => e.Status)
                     .HasMaxLength(50)
                     .IsUnicode(false);
-
-                entity.HasOne(d => d.Merchant)
-                    .WithMany(p => p.Hotels)
-                    .HasForeignKey(d => d.MerchantId)
-                    .HasConstraintName("FK_Hotel_MerchantProfile");
             });
 
             modelBuilder.Entity<MerchantProfile>(entity =>
@@ -118,11 +122,6 @@ namespace Model.Model
                 entity.Property(e => e.CompanyName)
                     .HasMaxLength(50)
                     .IsUnicode(false);
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.MerchantProfiles)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_MerchantProfile_User");
             });
 
             modelBuilder.Entity<Payment>(entity =>
@@ -163,11 +162,6 @@ namespace Model.Model
                 entity.Property(e => e.Origin)
                     .HasMaxLength(50)
                     .IsUnicode(false);
-
-                entity.HasOne(d => d.Merchant)
-                    .WithMany(p => p.Ticketings)
-                    .HasForeignKey(d => d.MerchantId)
-                    .HasConstraintName("FK_Ticketing_MerchantProfile");
             });
 
             modelBuilder.Entity<Transaction>(entity =>
@@ -181,26 +175,6 @@ namespace Model.Model
                 entity.Property(e => e.VirtualAccount)
                     .HasMaxLength(50)
                     .IsUnicode(false);
-
-                entity.HasOne(d => d.DetailsHotel)
-                    .WithMany(p => p.Transactions)
-                    .HasForeignKey(d => d.DetailsHotelId)
-                    .HasConstraintName("FK_Transaction_DetailsHotel");
-
-                entity.HasOne(d => d.DetailsTicketing)
-                    .WithMany(p => p.Transactions)
-                    .HasForeignKey(d => d.DetailsTicketingId)
-                    .HasConstraintName("FK_Transaction_DetailsTicketing");
-
-                entity.HasOne(d => d.Payment)
-                    .WithMany(p => p.Transactions)
-                    .HasForeignKey(d => d.PaymentId)
-                    .HasConstraintName("FK_Transaction_Payment");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Transactions)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK_Transaction_User");
             });
 
             modelBuilder.Entity<User>(entity =>

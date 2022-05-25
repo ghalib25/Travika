@@ -12,8 +12,6 @@ namespace TransactionService.GraphQL
                 Id = t.Id,
                 UserId = t.UserId,
                 VirtualAccount = t.VirtualAccount,
-                DetailsTicketingId = t.DetailsTicketingId,
-                DetailsHotelId = t.DetailsHotelId,
                 PaymentId = t.PaymentId,
                 TotalBill = t.TotalBill,
                 PaymentStatus = t.PaymentStatus

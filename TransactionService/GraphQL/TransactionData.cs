@@ -2,10 +2,9 @@
 {
     public record TransactionData
     (
-        int? DetailHotelId,
-        int? DetailTicketingId,
         int PaymentId,
-        string Status
-
+        string Status,
+        DetailHotelData DetailHotels,
+        DetailTicketingData DetailTicketings
     );
 }
