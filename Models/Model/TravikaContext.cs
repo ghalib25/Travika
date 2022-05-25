@@ -195,6 +195,16 @@ namespace Model.Model
             modelBuilder.Entity<UserRole>(entity =>
             {
                 entity.ToTable("UserRole");
+
+                entity.HasOne(d => d.Role)
+                    .WithMany(p => p.UserRoles)
+                    .HasForeignKey(d => d.RoleId)
+                    .HasConstraintName("FK_UserRole_Role");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.UserRoles)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK_UserRole_User");
             });
 
             OnModelCreatingPartial(modelBuilder);
