@@ -99,10 +99,10 @@ namespace UserService.GraphQL
 
         [Authorize(Roles = new[] { "MANAGER" })]
         public async Task<User> UpdateUserAsync(
-            UserInput input,
+            UserInput input, int id,
             [Service] TravikaContext context)
         {
-            var user = context.Users.Where(o => o.Id == input.Id).FirstOrDefault();
+            var user = context.Users.Where(o => o.Id == id).FirstOrDefault();
             if (user != null)
             {
                 user.Username = input.Username;

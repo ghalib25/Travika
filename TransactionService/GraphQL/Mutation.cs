@@ -3,10 +3,11 @@ using Model.Model;
 using System.Security.Claims;
 using TransactionService.GraphQL;
 
-namespace TransactionService
+namespace TransactionService.GraphQL
 {
     public class Mutation
     {
+        // Add Transaction
         [Authorize(Roles = new[] { "CUSTOMER" })]
         public async Task<TransactionStatus> AddTransactionAsync(
             TransactionData input,
@@ -54,7 +55,76 @@ namespace TransactionService
                     ));
             }
         }
-        //Update
+
+        //Add detail Hotel
+        [Authorize(Roles = new[] { "CUSTOMER" })]
+        public async Task<TransactionStatus> AddDetailHotelAsync(
+            DetailsHotel input,
+            ClaimsPrincipal claimsPrincipal,
+            [Service] TravikaContext context)
+        {
+            var userName = claimsPrincipal.Identity.Name;
+            var customer = context.Users.Where(u => u.Username == userName).FirstOrDefault();
+            var checkstatus = context.Transactions.Where(c => c.UserId == customer.Id).LastOrDefault();
+
+            if (checkstatus.PaymentStatus != "Unpaid")
+            {
+                var detailsHotel = new DetailsHotel
+                {
+                    HotelId = input.HotelId,
+                    Quantity = input.Quantity
+                };
+                var ret = context.DetailsHotels.Add(detailsHotel);
+                await context.SaveChangesAsync();
+
+                return await Task.FromResult(new TransactionStatus
+                (
+                    true, "Order Successfull"
+                ));
+
+            }
+
+            return await Task.FromResult(new TransactionStatus
+               (
+                   false, "Finish Your Last Order!!!"
+               ));
+        }
+
+        //Add detail Hotel
+        [Authorize(Roles = new[] { "CUSTOMER" })]
+        public async Task<TransactionStatus> AddDetailTicketingAsync(
+            DetailsTicketing input,
+            ClaimsPrincipal claimsPrincipal,
+            [Service] TravikaContext context)
+        {
+            var userName = claimsPrincipal.Identity.Name;
+            var customer = context.Users.Where(u => u.Username == userName).FirstOrDefault();
+            var checkstatus = context.Transactions.Where(c => c.UserId == customer.Id).LastOrDefault();
+
+            if (checkstatus.PaymentStatus != "Unpaid")
+            {
+                var detailsTicketing = new DetailsTicketing
+                {
+                    TicketingId = input.TicketingId,
+                    Quantity = input.Quantity
+                };
+                var ret = context.DetailsTicketings.Add(detailsTicketing);
+                await context.SaveChangesAsync();
+
+                return await Task.FromResult(new TransactionStatus
+                (
+                    true, "Order Successfull"
+                ));
+
+            }
+
+            return await Task.FromResult(new TransactionStatus
+               (
+                   false, "Finish Your Last Order!!!"
+               ));
+        }
+
+        //Update Transaction
         [Authorize(Roles = new[] { "CUSTOMER" })]
         public async Task<TransactionStatus> UpdateTransactionAsync(
           int id, int payid,
@@ -85,7 +155,7 @@ namespace TransactionService
                ));
         }
 
-        //Delete
+        //Delete Transaction
         [Authorize(Roles = new[] { "CUSTOMER" })]
         public async Task<Transaction> DeleteTransactionByIdAsync(
             int id,
