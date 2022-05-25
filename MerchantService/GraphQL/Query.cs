@@ -1,4 +1,5 @@
 ﻿using HotChocolate.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Model.Model;
 
 namespace MerchantService.GraphQL
@@ -7,10 +8,10 @@ namespace MerchantService.GraphQL
     {
         [Authorize(Roles = new[] { "CUSTOMER" })]
         public IQueryable<Ticketing> GetTicketing([Service] TravikaContext context) =>
-            context.Ticketings;
+            context.Ticketings.Include(t => t.DetailsTicketings);
 
         [Authorize(Roles = new[] { "CUSTOMER" })]
         public IQueryable<Hotel> GetHotel([Service] TravikaContext context) =>
-            context.Hotels;
+            context.Hotels.Include(t => t.DetailsHotels);
     }
 }
