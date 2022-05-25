@@ -41,7 +41,7 @@ namespace TransactionService.GraphQL
                     var transaction = new Transaction
                     {
                         UserId = customer.Id,
-                        VirtualAccount = "0778" + customerprofile.Phone,
+                        VirtualAccount = "078" + customerprofile.Phone,
                         PaymentId = input.PaymentId,
                         TotalBill = 0,
                         PaymentStatus = "Unpaid"
