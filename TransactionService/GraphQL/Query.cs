@@ -1,4 +1,5 @@
 ﻿using HotChocolate.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Model.Model;
 using System.Security.Claims;
 
@@ -7,16 +8,26 @@ namespace TransactionService.GraphQL
     public class Query
     {
         [Authorize(Roles = new[] { "CUSTOMER" })]
-        public IQueryable<Transaction> GetTransactions([Service] TravikaContext context) =>
-            context.Transactions.Select(t => new Transaction()
+        public IQueryable<Transaction> GetTransactions(ClaimsPrincipal claimsPrincipal, [Service] TravikaContext context)
+        {
+            var username = claimsPrincipal.Identity.Name;
+            var user = context.Users.Where(o => o.Username == username).FirstOrDefault();
+            if (user != null)
             {
-                Id = t.Id,
-                UserId = t.UserId,
-                VirtualAccount = t.VirtualAccount,
-                PaymentId = t.PaymentId,
-                TotalBill = t.TotalBill,
-                PaymentStatus = t.PaymentStatus
-            });
+                var transactions = context.Transactions
+                    .Where(o => o.UserId == user.Id)
+                    .Include(t => t.DetailsTicketings)
+                    .Include(t => t.DetailsHotels);
+                return transactions.AsQueryable();
+            }
+            return new List<Transaction>().AsQueryable();
+        }
+
+        [Authorize(Roles = new[] { "MANAGER" })]
+        public IQueryable<Transaction> GetAllTransactions([Service] TravikaContext context)=>
+            context.Transactions.Include(t => t.DetailsTicketings).Include(t => t.DetailsHotels);
+       
+
 
         //Check Transaction
         [Authorize(Roles = new[] { "CUSTOMER" })]
