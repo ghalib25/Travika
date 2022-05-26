@@ -118,7 +118,7 @@ namespace TransactionService.GraphQL
                     }
                     else if (transaction.PaymentId == 1)
                     {
-                        bool result = KafkaHelper.SendMessage(settings.Value, "BANK", key, val).Result;
+                        bool result = KafkaHelper.SendMessage(settings.Value, "BankTravika", key, val).Result;
                         if (result)
                         {
                             Console.WriteLine("Sukses Kirim ke Kafka");
