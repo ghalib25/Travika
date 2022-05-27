@@ -48,6 +48,7 @@ namespace UserService.GraphQL
             });
         }
 
+        //========================================LOGIN FOR ALL USER==========================================//
         public async Task<UserToken> LoginAsync(
             LoginUser input,
             [Service] IOptions<TokenSettings> tokenSettings, // setting token
@@ -97,12 +98,13 @@ namespace UserService.GraphQL
             return await Task.FromResult(new UserToken(null, null, Message: "Username or password was invalid"));
         }
 
+        //========================================UPDATE USER BY MANAGER==========================================//
         [Authorize(Roles = new[] { "MANAGER" })]
         public async Task<User> UpdateUserAsync(
-            UserInput input, int id,
+            UserInput input,
             [Service] TravikaContext context)
         {
-            var user = context.Users.Where(o => o.Id == id).FirstOrDefault();
+            var user = context.Users.Where(o => o.Id == input.Id).FirstOrDefault();
             if (user != null)
             {
                 user.Username = input.Username;
@@ -117,30 +119,21 @@ namespace UserService.GraphQL
         }
 
         [Authorize(Roles = new[] { "MANAGER" })]
-        public async Task<TransactionStatus> DeleteUserByIdAsync(
+        public async Task<User> DeleteUserByIdAsync(
             int id,
             [Service] TravikaContext context)
         {
             var user = context.Users.Where(o => o.Id == id).FirstOrDefault();
-            if (user == null)
+            if (user != null)
             {
-                return await Task.FromResult(new TransactionStatus(false, "User not Found!"));
+                context.Users.Remove(user);
+                await context.SaveChangesAsync();
             }
-            var transaction = context.Transactions.Where(o => o.Id == user.Id).FirstOrDefault();
-
-            context.Users.Remove(user);
-            await context.SaveChangesAsync();
-
-            return await Task.FromResult(new TransactionStatus
-                (
-                true, "User Deleted"
-                ));
-
+            return await Task.FromResult(user);
         }
 
-        //========================================ADD CUSTOMER PROFILE BY USER==========================================// 
-
-        [Authorize(Roles = new[] { "CUSTOMER" })]
+        //========================================ADD CUSTOMER PROFILE BY USER==========================================//
+        [Authorize]
         public async Task<CustomerProfile> AddCustomerProfileAsync(
            CustomerProfileInput input,
            [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
@@ -166,51 +159,28 @@ namespace UserService.GraphQL
             return ret.Entity;
         }
 
-        //========================================ADD/UPDATE MERCHANT PROFILE BY USER==========================================//        
-
-        [Authorize(Roles = new[] { "MERCHANT" })]
-        public async Task<TransactionStatus> ManageMerchantProfileAsync(
+        //========================================ADD MERCHANT PROFILE BY USER==========================================//
+        [Authorize]
+        public async Task<MerchantProfile> AddMerchantProfileAsync(
            MerchantProfileInput input,
            [Service] TravikaContext context, ClaimsPrincipal claimsPrincipal)
         {
             var userName = claimsPrincipal.Identity.Name;
             var user = context.Users.Where(o => o.Username == userName).FirstOrDefault();
-            if (user == null)
-            {
-                return await Task.FromResult(new TransactionStatus(false, "User not Found!"));
-            }
-
-            var merchantname = context.MerchantProfiles.Where(m => m.CompanyName == input.CompanyName).FirstOrDefault();
-            if (merchantname != null)
-            {
-                return await Task.FromResult(new TransactionStatus(false, "Company Name Sudah ada"));
-            }
             var profileMerchant = context.MerchantProfiles.Where(o => o.UserId == user.Id).FirstOrDefault();
-            if (profileMerchant == null)
+
+            if (profileMerchant != null) return new MerchantProfile { CompanyName = "Merchant profile sudah tersedia" };
+            if (user == null) return new MerchantProfile();
+
+            var merchantProfile = new MerchantProfile
             {
-                var merchantProfile = new MerchantProfile
-                {
-                    UserId = user.Id,
-                    CompanyName = input.CompanyName
-                };
-                context.MerchantProfiles.Add(merchantProfile);
-
-                await context.SaveChangesAsync();
-                return await Task.FromResult(new TransactionStatus
-                    (
-                    true, "Merchant Profile Has Been Added"
-                    ));
-            }
-            profileMerchant.CompanyName = input.CompanyName;
-
-            context.MerchantProfiles.Update(profileMerchant);
+                UserId = user.Id,
+                CompanyName = input.CompanyName
+            };
+            var ret = context.MerchantProfiles.Add(merchantProfile);
             await context.SaveChangesAsync();
 
-            return await Task.FromResult(new TransactionStatus
-            (
-                true, "Merchant Profile Has Been Saved"
-            ));
-
+            return ret.Entity;
         }
 
         //========================================UPDATE USER ROLE BY MANAGER=====================================//
