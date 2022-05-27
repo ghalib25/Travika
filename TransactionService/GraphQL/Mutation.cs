@@ -16,7 +16,8 @@ namespace TransactionService.GraphQL
         public async Task<TransactionStatus> AddTransactionAsync(
             TransactionData input,
             ClaimsPrincipal claimsPrincipal,
-            [Service] TravikaContext context)
+            [Service] TravikaContext context,
+            IOptions<KafkaSettings> settings)
         {
             using var begintransaction = context.Database.BeginTransaction();
             var userName = claimsPrincipal.Identity.Name;
@@ -94,49 +95,49 @@ namespace TransactionService.GraphQL
                     await begintransaction.CommitAsync();
 
 
-                    ////SendDataOrder dengan Kafka
-                    //SendDataOrder virtualAccount = new SendDataOrder
-                    //{
-                    //    TransactionId = transaction.Id,
-                    //    Virtualaccount = transaction.VirtualAccount , //0778 + phone
-                    //    Bills = Convert.ToString(transaction.TotalBill), //total cost
-                    //    PaymentStatus = transaction.PaymentStatus
-                    //};
+                    //SendDataOrder dengan Kafka
+                    SendDataOrder virtualAccount = new SendDataOrder
+                    {
+                        TransactionId = transaction.Id,
+                        Virtualaccount = transaction.VirtualAccount, //0778 + phone
+                        Bills = Convert.ToString(transaction.TotalBill), //total cost
+                        PaymentStatus = transaction.PaymentStatus
+                    };
 
-                    //var key = DateTime.Now.ToString();
-                    //var val = JsonConvert.SerializeObject(virtualAccount);
-                    //if (transaction.PaymentId == 2)
-                    //{
-                    //    bool result = KafkaHelper.SendMessage(settings.Value, "OPO", key, val).Result;
-                    //    if (result)
-                    //    {
-                    //        Console.WriteLine("Sukses Kirim ke Kafka");
-                    //    }
-                    //    else
-                    //    {
-                    //        Console.WriteLine("Gagal Kirim ke Kafka");
-                    //    }
-                    //}
-                    //else if (transaction.PaymentId == 1)
-                    //{
-                    //    bool result = KafkaHelper.SendMessage(settings.Value, "BankTravika", key, val).Result;
-                    //    if (result)
-                    //    {
-                    //        Console.WriteLine("Sukses Kirim ke Kafka");
-                    //    }
-                    //    else
-                    //    {
-                    //        Console.WriteLine("Gagal Kirim ke Kafka");
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    throw new Exception("Payment Not Available");
-                    //}
-                    //return await Task.FromResult(new TransactionStatus
-                    //    (
-                    //    true, "Berhasil Membuat Order"
-                    //    ));
+                    var key = DateTime.Now.ToString();
+                    var val = JsonConvert.SerializeObject(virtualAccount);
+                    if (transaction.PaymentId == 2)
+                    {
+                        bool result = KafkaHelper.SendMessage(settings.Value, "OPO", key, val).Result;
+                        if (result)
+                        {
+                            Console.WriteLine("Sukses Kirim ke Kafka");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Gagal Kirim ke Kafka");
+                        }
+                    }
+                    else if (transaction.PaymentId == 1)
+                    {
+                        bool result = KafkaHelper.SendMessage(settings.Value, "Bank", key, val).Result;
+                        if (result)
+                        {
+                            Console.WriteLine("Sukses Kirim ke Kafka");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Gagal Kirim ke Kafka");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Payment Not Available");
+                    }
+                    return await Task.FromResult(new TransactionStatus
+                        (
+                        true, "Berhasil Membuat Order"
+                        ));
                 }
                 else
                 {
