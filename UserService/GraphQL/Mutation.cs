@@ -48,6 +48,7 @@ namespace UserService.GraphQL
             });
         }
 
+        //========================================LOGIN FOR ALL USER==========================================//
         public async Task<UserToken> LoginAsync(
             LoginUser input,
             [Service] IOptions<TokenSettings> tokenSettings, // setting token
@@ -97,6 +98,7 @@ namespace UserService.GraphQL
             return await Task.FromResult(new UserToken(null, null, Message: "Username or password was invalid"));
         }
 
+        //========================================UPDATE USER BY MANAGER==========================================//
         [Authorize(Roles = new[] { "MANAGER" })]
         public async Task<User> UpdateUserAsync(
             UserInput input,
@@ -130,8 +132,7 @@ namespace UserService.GraphQL
             return await Task.FromResult(user);
         }
 
-        //========================================ADD CUSTOMER PROFILE BY USER==========================================// 
-
+        //========================================ADD CUSTOMER PROFILE BY USER==========================================//
         [Authorize]
         public async Task<CustomerProfile> AddCustomerProfileAsync(
            CustomerProfileInput input,
@@ -158,8 +159,7 @@ namespace UserService.GraphQL
             return ret.Entity;
         }
 
-        //========================================ADD MERCHANT PROFILE BY USER==========================================//        
-
+        //========================================ADD MERCHANT PROFILE BY USER==========================================//
         [Authorize]
         public async Task<MerchantProfile> AddMerchantProfileAsync(
            MerchantProfileInput input,

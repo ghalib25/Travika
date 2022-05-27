@@ -58,5 +58,25 @@ namespace UserService.GraphQL
             }
             return new List<MerchantProfile>().AsQueryable();
         }
+
+        //-------------------------------------VIEW ALL MERCHANT BY MANAGER--------------------------------------------//
+        [Authorize(Roles = new[] { "MANAGER" })]
+        public IQueryable<User> GetViewMerchants(
+            [Service] TravikaContext context)
+        {
+            var userRole = context.Roles.Where(k => k.Role1 == "MERCHANT").FirstOrDefault();
+            var merchants = context.Users.Where(k => k.UserRoles.Any(o => o.RoleId == userRole.Id));
+            return merchants.AsQueryable();
+        }
+
+        //-------------------------------------VIEW ALL CUSTOMER BY MANAGER--------------------------------------------//
+        [Authorize(Roles = new[] { "MANAGER" })]
+        public IQueryable<User> GetViewCustomers(
+            [Service] TravikaContext context)
+        {
+            var userRole = context.Roles.Where(k => k.Role1 == "CUSTOMER").FirstOrDefault();
+            var cistomers = context.Users.Where(k => k.UserRoles.Any(o => o.RoleId == userRole.Id));
+            return cistomers.AsQueryable();
+        }
     }
 }
