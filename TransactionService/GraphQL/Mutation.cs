@@ -17,7 +17,7 @@ namespace TransactionService.GraphQL
             TransactionData input,
             ClaimsPrincipal claimsPrincipal,
             [Service] TravikaContext context,
-            IOptions<KafkaSettings> settings)
+            [Service] IOptions<KafkaSettings> settings)
         {
             using var begintransaction = context.Database.BeginTransaction();
             var userName = claimsPrincipal.Identity.Name;
