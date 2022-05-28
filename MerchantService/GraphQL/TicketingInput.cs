@@ -7,6 +7,7 @@
         string Category,
         string Origin,
         string Destination,
-        int Price
+        int Price,
+        int Seat
     );
 }
