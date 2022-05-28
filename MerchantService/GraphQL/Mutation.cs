@@ -27,7 +27,7 @@ namespace MerchantService.GraphQL
                 Departure = DateTime.Now,
                 Arrival = DateTime.Now.AddHours(9),
                 Price = input.Price,
-
+                Seat = input.seat
             };
 
             var ret = context.Ticketings.Add(ticketing);
@@ -91,7 +91,8 @@ namespace MerchantService.GraphQL
                 HotelName = input.HotelName,
                 Address = input.Address,
                 City = input.City,
-                Price = input.Price
+                Price = input.Price,
+                Room = input.Room
             };
 
             var ret = context.Hotels.Add(hotel);

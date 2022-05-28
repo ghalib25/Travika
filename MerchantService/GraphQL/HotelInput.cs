@@ -7,6 +7,7 @@
        string HotelName,
        string Address,
        string City,
-       int Price
+       int Price,
+       int Room
    );
 }
