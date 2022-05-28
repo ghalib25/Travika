@@ -49,6 +49,9 @@ builder.Services
 
 //inject Kafka
 builder.Services.Configure<KafkaSettings>(builder.Configuration.GetSection("KafkaSettings"));
+
+//Consumer Service (Background Service)
+builder.Services.AddHostedService<ConsumerService>();
 var app = builder.Build();
 
 app.UseAuthentication();
